@@ -1,0 +1,688 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JihoCalculator | 25101399</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f6fb;
+            color: #172033;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 48px 20px;
+        }
+
+        header {
+            margin-bottom: 28px;
+        }
+
+        header .eyebrow {
+            font-size: 13px;
+            font-weight: bold;
+            color: #3757ba;
+        }
+
+        h1 {
+            margin: 8px 0;
+            font-size: 34px;
+        }
+
+        header p {
+            margin: 0;
+            color: #667085;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e3e8f0;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 8px 24px #202b4a0a;
+        }
+
+        h2 {
+            margin: 0 0 22px;
+            font-size: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cdd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            color: #172033;
+        }
+
+        select:focus, input:focus {
+            outline: 3px solid #4569d32b;
+            border-color: #4569d3;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 10px;
+            padding: 13px 18px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: .45;
+        }
+
+        .primary {
+            background: #3157ca;
+            color: white;
+            flex: 1;
+        }
+
+        .secondary {
+            background: #edf1fa;
+            color: #294477;
+        }
+
+        .result {
+            margin-top: 24px;
+            padding: 22px;
+            border-radius: 14px;
+            background: #eff4ff;
+        }
+
+        .result .caption {
+            font-size: 13px;
+            color: #52658f;
+            font-weight: bold;
+        }
+
+        .result .expression {
+            margin-top: 10px;
+            color: #344a71;
+            overflow-wrap: anywhere;
+        }
+
+        .result .value {
+            margin-top: 5px;
+            font-size: 28px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .result.error {
+            background: #fff1f1;
+            color: #b42318;
+        }
+
+        .result.error .caption,
+        .result.error .expression {
+            color: #b42318;
+        }
+
+        .history-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .history-head small {
+            color: #667085;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 18px;
+            max-height: 390px;
+            overflow-y: auto;
+        }
+
+        .history-list li {
+            background: #f7f9fc;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .empty {
+            color: #667085;
+            text-align: center;
+            padding: 60px 5px;
+            font-size: 14px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-actions button {
+            flex: 1;
+        }
+
+        .footer {
+            color: #7b8496;
+            margin-top: 18px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* 태블릿 및 모바일 화면 */
+        @media (max-width: 760px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding-top: 24px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+        }
+
+        /* 작은 스마트폰 화면 최적화 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 12px;
+            }
+
+            .card {
+                padding: 20px 16px;
+            }
+
+            .inputs {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .actions,
+            .history-actions {
+                flex-direction: column;
+            }
+
+            .actions button,
+            .history-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+
+        <header>
+            <div class="eyebrow">
+                C++ 1주차 프로젝트의 웹 버전 · 2주차 과제
+            </div>
+
+            <h1>JihoCalculator</h1>
+
+            <p>
+                컴퓨터소프트웨어학과 · 25101399 · 정지호
+            </p>
+        </header>
+
+        <div class="layout">
+
+            <!-- 계산기 영역 -->
+            <section class="card" aria-labelledby="calcTitle">
+
+                <h2 id="calcTitle">계산하기</h2>
+
+                <form id="calcForm">
+
+                    <div class="field">
+                        <label for="operation">계산 종류</label>
+
+                        <select id="operation">
+                            <option value="1">덧셈 (+)</option>
+                            <option value="2">뺄셈 (-)</option>
+                            <option value="3">곱셈 (×)</option>
+                            <option value="4">나눗셈 (÷)</option>
+                            <option value="5">거듭제곱 (^)</option>
+                            <option value="6">제곱근 (√)</option>
+                            <option value="7">백분율 (%)</option>
+                        </select>
+                    </div>
+
+                    <div class="inputs">
+                        <div class="field">
+                            <label id="labelA" for="numberA">
+                                첫 번째 숫자
+                            </label>
+                            <input
+                                id="numberA"
+                                type="number"
+                                step="any"
+                                placeholder="예: 10"
+                                required>
+                        </div>
+
+                        <div class="field" id="fieldB">
+                            <label id="labelB" for="numberB">
+                                두 번째 숫자
+                            </label>
+                            <input
+                                id="numberB"
+                                type="number"
+                                step="any"
+                                placeholder="예: 20"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="primary" type="submit">
+                            계산하기
+                        </button>
+
+                        <button
+                            class="secondary"
+                            type="button"
+                            id="reuseBtn"
+                            disabled>
+                            결과 재사용
+                        </button>
+                    </div>
+
+                </form>
+
+                <div class="result" id="resultBox" aria-live="polite">
+                    <div class="caption">계산 결과</div>
+
+                    <div class="expression" id="expression">
+                        숫자를 입력하고 계산해 보세요.
+                    </div>
+
+                    <div class="value" id="resultValue">—</div>
+                </div>
+            </section>
+
+            <!-- 계산 기록 영역 -->
+            <aside class="card" aria-labelledby="historyTitle">
+
+                <div class="history-head">
+                    <h2 id="historyTitle">계산 기록</h2>
+                    <small id="count">0건</small>
+                </div>
+
+                <p class="empty" id="empty">
+                    아직 계산 기록이 없습니다.
+                </p>
+
+                <ol class="history-list" id="historyList"></ol>
+
+                <div class="history-actions">
+                    <button
+                        class="secondary"
+                        type="button"
+                        id="clearBtn">
+                        전체 초기화
+                    </button>
+
+                    <button
+                        class="secondary"
+                        type="button"
+                        id="downloadBtn">
+                        TXT 저장
+                    </button>
+                </div>
+
+            </aside>
+        </div>
+
+        <p class="footer">
+            1주차 C++ 계산기의 연산 기능을 JavaScript로 구현했습니다.
+        </p>
+
+    </main>
+
+    <script>
+        // 브라우저 계산 기록 저장용 키
+        const KEY = "JihoCalculator_25101399_history";
+
+        // HTML 요소 가져오기
+        const operation = document.getElementById("operation");
+        const numberA = document.getElementById("numberA");
+        const numberB = document.getElementById("numberB");
+        const fieldB = document.getElementById("fieldB");
+
+        const resultBox = document.getElementById("resultBox");
+        const expressionBox = document.getElementById("expression");
+        const resultValue = document.getElementById("resultValue");
+
+        const reuseBtn = document.getElementById("reuseBtn");
+
+        const list = document.getElementById("historyList");
+        const empty = document.getElementById("empty");
+        const count = document.getElementById("count");
+
+        let lastResult = null;
+
+        // 브라우저에 저장된 계산 기록 불러오기
+        function loadHistory() {
+            try {
+                const data = JSON.parse(
+                    localStorage.getItem(KEY) || "[]"
+                );
+
+                return Array.isArray(data)
+                    ? data.filter(item =>
+                        typeof item.expression === "string" &&
+                        typeof item.result === "string"
+                      ).slice(0, 100)
+                    : [];
+
+            } catch {
+                return [];
+            }
+        }
+
+        let history = loadHistory();
+
+        // 계산 기록 자동 저장
+        function storeHistory() {
+            try {
+                localStorage.setItem(
+                    KEY,
+                    JSON.stringify(history)
+                );
+            } catch {
+                // 저장이 제한되면 현재 실행 중인 기록만 사용
+            }
+        }
+
+        // 결과 숫자 표시 형식
+        function fmt(value) {
+            return Number(value.toPrecision(12)).toString();
+        }
+
+        // 계산 기록 화면에 출력
+        function showHistory() {
+            list.replaceChildren();
+
+            empty.hidden = history.length > 0;
+            count.textContent = history.length + "건";
+
+            for (const item of history) {
+                const li = document.createElement("li");
+
+                li.textContent =
+                    item.expression + " = " + item.result;
+
+                list.appendChild(li);
+            }
+        }
+
+        // 계산 종류에 따라 입력창 변경
+        function updateOperation() {
+            const op = Number(operation.value);
+
+            fieldB.hidden = op === 6;
+            numberB.required = op !== 6;
+
+            document.getElementById("labelA").textContent =
+                op === 6 ? "제곱근을 구할 숫자" :
+                op === 7 ? "기준 금액(또는 수)" :
+                "첫 번째 숫자";
+
+            document.getElementById("labelB").textContent =
+                op === 7 ? "몇 퍼센트(%)" : "두 번째 숫자";
+        }
+
+        // 실제 계산 함수
+        function calculate(op, a, b) {
+            switch (op) {
+                case 1:
+                    return [
+                        a + b,
+                        `${fmt(a)} + ${fmt(b)}`
+                    ];
+
+                case 2:
+                    return [
+                        a - b,
+                        `${fmt(a)} - ${fmt(b)}`
+                    ];
+
+                case 3:
+                    return [
+                        a * b,
+                        `${fmt(a)} × ${fmt(b)}`
+                    ];
+
+                case 4:
+                    if (b === 0) {
+                        throw new Error("0으로 나눌 수 없습니다.");
+                    }
+
+                    return [
+                        a / b,
+                        `${fmt(a)} ÷ ${fmt(b)}`
+                    ];
+
+                case 5:
+                    return [
+                        Math.pow(a, b),
+                        `${fmt(a)} ^ ${fmt(b)}`
+                    ];
+
+                case 6:
+                    if (a < 0) {
+                        throw new Error(
+                            "음수의 제곱근은 실수 범위에서 계산할 수 없습니다."
+                        );
+                    }
+
+                    return [
+                        Math.sqrt(a),
+                        `√(${fmt(a)})`
+                    ];
+
+                case 7:
+                    return [
+                        a * b / 100,
+                        `${fmt(a)}의 ${fmt(b)}%`
+                    ];
+
+                default:
+                    throw new Error("지원하지 않는 연산입니다.");
+            }
+        }
+
+        // 계산 버튼 클릭 또는 Enter 입력
+        document.getElementById("calcForm").addEventListener(
+            "submit",
+            event => {
+                event.preventDefault();
+
+                try {
+                    const op = Number(operation.value);
+
+                    const rawA = numberA.value.trim();
+                    const rawB = numberB.value.trim();
+
+                    if (!rawA || (op !== 6 && !rawB)) {
+                        throw new Error(
+                            "계산할 숫자를 입력하세요."
+                        );
+                    }
+
+                    const a = Number(rawA);
+                    const b = op === 6 ? 0 : Number(rawB);
+
+                    if (
+                        !Number.isFinite(a) ||
+                        !Number.isFinite(b)
+                    ) {
+                        throw new Error(
+                            "올바른 숫자를 입력하세요."
+                        );
+                    }
+
+                    const [result, expr] = calculate(op, a, b);
+
+                    if (!Number.isFinite(result)) {
+                        throw new Error(
+                            "계산 결과가 실수 범위를 벗어났습니다."
+                        );
+                    }
+
+                    const formatted = fmt(result);
+
+                    // 계산 결과 표시
+                    resultBox.classList.remove("error");
+
+                    expressionBox.textContent = expr;
+                    resultValue.textContent = formatted;
+
+                    // 결과 재사용 준비
+                    lastResult = result;
+                    reuseBtn.disabled = false;
+
+                    // 계산 기록 추가
+                    history.unshift({
+                        expression: expr,
+                        result: formatted
+                    });
+
+                    // 최근 기록 100개까지 보관
+                    history = history.slice(0, 100);
+
+                    storeHistory();
+                    showHistory();
+
+                } catch (error) {
+                    resultBox.classList.add("error");
+
+                    expressionBox.textContent = "계산 오류";
+                    resultValue.textContent = error.message;
+                }
+            }
+        );
+
+        // 연산 선택 변경
+        operation.addEventListener(
+            "change",
+            updateOperation
+        );
+
+        // 이전 결과 재사용
+        reuseBtn.addEventListener("click", () => {
+            if (lastResult !== null) {
+                numberA.value = String(lastResult);
+                numberA.focus();
+            }
+        });
+
+        // 계산 기록 초기화
+        document.getElementById("clearBtn").addEventListener(
+            "click",
+            () => {
+                if (history.length === 0) return;
+
+                if (confirm("계산 기록을 모두 삭제하시겠습니까?")) {
+                    history = [];
+                    storeHistory();
+                    showHistory();
+                }
+            }
+        );
+
+        // 계산 기록을 TXT 파일로 다운로드
+        document.getElementById("downloadBtn").addEventListener(
+            "click",
+            () => {
+                if (history.length === 0) {
+                    alert("저장할 계산 기록이 없습니다.");
+                    return;
+                }
+
+                const lines = [
+                    "JihoCalculator 계산 기록",
+                    "학번: 25101399 / 이름: 정지호",
+                    "",
+                    ...history.slice().reverse().map(
+                        (item, index) =>
+                            `${index + 1}. ${item.expression} = ${item.result}`
+                    )
+                ];
+
+                const blob = new Blob(
+                    ["\uFEFF", lines.join("\r\n")],
+                    { type: "text/plain;charset=utf-8" }
+                );
+
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+
+                link.href = url;
+                link.download = "calculation_history.txt";
+
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
+        );
+
+        // 웹페이지 시작 시 실행
+        updateOperation();
+        showHistory();
+    </script>
+</body>
+</html>
